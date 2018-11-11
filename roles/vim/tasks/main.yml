@@ -1,0 +1,48 @@
+---
+- import_tasks: debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: Remove existing vim
+  apt: name={{ item }} state=absent
+  with_items:
+    - vim
+    - vim-runtime
+    - gvim
+  become: true
+
+- shell: type vim
+  register: vim_result
+  ignore_errors: True
+
+- name: Download vim source
+  shell: git clone --branch v{{ vim_version }} --depth 1 https://github.com/vim/vim.git /tmp/build/vim
+  args:
+    creates: /tmp/build/vim/
+  become: true
+  when: vim_result.rc != 0
+
+- name: Make and install vim
+  shell: |
+    ./configure --with-features=huge \
+        --enable-multibyte \
+        --enable-rubyinterp=yes \
+        --enable-pythoninterp=yes \
+        --with-python-config-dir=/usr/lib/python2.7/config-x86_64-linux-gnu \
+        --enable-python3interp=yes \
+        --with-python3-config-dir=/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu \
+        --enable-perlinterp=yes \
+        --enable-luainterp=yes \
+        --enable-gui=gtk2 \
+        --enable-cscope \
+        --prefix=/usr/local
+    checkinstall --maintainer=uzxmx --pkgname=vim --pkgversion={{ vim_version }} -y
+  args:
+    chdir: /tmp/build/vim
+  become: true
+  when: vim_result.rc != 0
+
+- name: Remove vim build directory
+  file:
+    path: /tmp/build/vim
+    state: absent
+  become: true

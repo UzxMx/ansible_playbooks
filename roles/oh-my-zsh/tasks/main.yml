@@ -1,0 +1,7 @@
+- shell: test -e ~/.oh-my-zsh
+  register: oh_my_zsh_result
+  ignore_errors: True
+
+- name: Install oh my zsh
+  shell: sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
+  when: oh_my_zsh_result.rc != 0

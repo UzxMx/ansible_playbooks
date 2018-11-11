@@ -1,0 +1,36 @@
+- name: Install dependencies
+  apt: name={{ item }} state=present
+  with_items:
+    - python-pip
+    - polipo
+  become: true
+
+- shell: type sslocal
+  register: sslocal_result
+  ignore_errors: True
+
+- name: Install shadowsocks
+  shell: pip install git+https://github.com/shadowsocks/shadowsocks.git@master
+  when: sslocal_result.rc != 0
+  become: true
+
+- file: 
+    path: ~/.sslocal
+    state: directory
+
+- name: Copy shadowsocks config
+  template: src=config.json dest=~/.sslocal/config.json
+
+- name: Start sslocal
+  shell: ps aux | grep sslocal | egrep -v grep || sslocal -c /home/uzxmx/.sslocal/config.json -d start
+  become: true
+
+- name: Copy polipo config
+  template: src=polipo dest=/etc/polipo/config
+  become: true
+
+- name: Start polipo
+  service:
+    name: polipo
+    state: restarted
+  become: true

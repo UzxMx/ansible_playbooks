@@ -1,0 +1,8 @@
+---
+- name: Reload config
+  shell: systemctl daemon-reload
+  become: true
+
+- name: Restart docker
+  shell: systemctl restart docker
+  become: true

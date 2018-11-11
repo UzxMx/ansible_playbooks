@@ -1,0 +1,6 @@
+- shell: type rcup
+  register: rcup_result
+  ignore_errors: True
+
+- import_tasks: debian.yml
+  when: ansible_os_family == 'Debian'

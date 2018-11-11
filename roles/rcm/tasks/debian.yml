@@ -1,0 +1,8 @@
+- name: Install rcm
+  shell: |
+    wget -qO - https://apt.thoughtbot.com/thoughtbot.gpg.key | apt-key add -
+    echo "deb http://apt.thoughtbot.com/debian/ stable main" | tee /etc/apt/sources.list.d/thoughtbot.list
+    apt-get update
+    apt-get install -y rcm
+  become: true
+  when: rcup_result.rc != 0

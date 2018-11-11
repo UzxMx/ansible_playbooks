@@ -1,0 +1,3 @@
+- src: https://github.com/zzet/ansible-rbenv-role
+  version: 3.4.1
+  name: rbenv

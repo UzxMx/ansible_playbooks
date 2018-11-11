@@ -1,0 +1,16 @@
+- hosts: all
+  roles:
+    - role: docker
+    - role: kubernetes
+  vars:
+    # proxy_env:
+    #   HTTP_PROXY: http://192.168.1.3:8123
+    #   HTTPS_PROXY: https://192.168.1.3:8123
+
+    # Need to update to 1.12.2. More info see https://github.com/kubernetes/kubernetes/issues/69503
+    kubernetes:
+      version: v1.12.1
+      dep_images: 
+        - pause:3.1
+        - etcd:3.2.24
+        - coredns:1.2.2

@@ -1,0 +1,10 @@
+{
+    "server":"j1.0bad.com",
+    "server_port":36238,
+    "local_address":"0.0.0.0",
+    "local_port":1080,
+    "password":"{{ shadowsocks_password }}",
+    "timeout":300,
+    "method":"aes-128-cfb",
+    "fast_open":false
+}

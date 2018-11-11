@@ -1,0 +1,6 @@
+proxyAddress = "0.0.0.0"
+daemonise = true
+logSyslog = true
+logFile = /var/log/polipo/polipo.log
+logLevel = 0xFF
+socksParentProxy = "127.0.0.1:1080"

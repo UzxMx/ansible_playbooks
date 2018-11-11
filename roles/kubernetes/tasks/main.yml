@@ -1,0 +1,45 @@
+---
+- import_tasks: debian.yml
+  when: ansible_os_family == 'Debian'
+
+- shell: type kubectl
+  register: kubectl_result
+  ignore_errors: True
+
+- name: Install kubelet, kubeadm and kubectl
+  script: install_kubernetes.sh
+  environment: "{{ proxy_env | default({}) }}"
+  when: kubectl_result.rc != 0
+  become: true
+
+- name: Pull kubernetes images
+  shell: |
+    bash -c "
+    docker pull anjia0532/google-containers.{{ item }}:{{ kubernetes.version }}
+    docker tag anjia0532/google-containers.{{ item }}:{{ kubernetes.version }} k8s.gcr.io/{{ item  }}:{{ kubernetes.version }}
+    "
+  with_items:
+    - kube-apiserver
+    - kube-controller-manager
+    - kube-scheduler
+    - kube-proxy
+  become: true
+
+- name: Pull kubernetes dependent images
+  shell: |
+    bash -c "
+    docker pull anjia0532/google-containers.{{ item }}
+    docker tag anjia0532/google-containers.{{ item }} k8s.gcr.io/{{ item  }}
+    "
+  with_items: "{{ kubernetes.dep_images }}"
+  become: true
+
+- name: Turn off swap
+  shell: swapoff -a 
+  become: true
+
+- name: Run kubeadm init
+  script: kubeadm_init.sh
+
+- name: Schedule pods on the master
+  command: kubectl taint nodes --all node-role.kubernetes.io/master-

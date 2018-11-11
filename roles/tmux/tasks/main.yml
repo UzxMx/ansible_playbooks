@@ -1,0 +1,27 @@
+---
+- import_tasks: debian.yml
+  when: ansible_os_family == 'Debian'
+
+- shell: type tmux
+  register: tmux_result
+  ignore_errors: True
+
+- name: Download tmux source
+  shell: git clone --branch 2.7 --depth 1 https://github.com/tmux/tmux.git /tmp/build/tmux
+  args:
+    creates: /tmp/build/tmux/
+  become: true
+  when: tmux_result.rc != 0
+
+- name: Make and install tmux
+  shell: sh autogen.sh && ./configure && make && make install
+  args:
+    chdir: /tmp/build/tmux
+  become: true
+  when: tmux_result.rc != 0
+
+- name: Remove tmux build directory
+  file:
+    path: /tmp/build/tmux
+    state: absent
+  become: true
