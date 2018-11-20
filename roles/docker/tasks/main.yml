@@ -2,27 +2,18 @@
 - import_tasks: debian.yml
   when: ansible_os_family == 'Debian'
 
-- file:
+- name: Ensure docker service directory present
+  file:
     path: /etc/systemd/system/docker.service.d
     state: directory
   become: true
 
-- copy: src=daemon.json dest=/etc/systemd/system/docker.service.d/daemon.json
+- name: Copy daemon.json to docker service directory
+  copy: src=daemon.json dest=/etc/systemd/system/docker.service.d/daemon.json
   become: true
   notify:
     - Reload config
     - Restart docker
 
-# - name: Copy http proxy conf
-#   template: src=http-proxy.conf.j2 dest=/etc/systemd/system/docker.service.d/http-proxy.conf
-#   become: true
-#   notify:
-#     - Reload config
-#     - Restart docker
-#
-# - name: Copy https proxy conf
-#   template: src=https-proxy.conf.j2 dest=/etc/systemd/system/docker.service.d/https-proxy.conf
-#   become: true
-#   notify:
-#     - Reload config
-#     - Restart docker
+- import_tasks: proxy.yml
+  when: proxy == true

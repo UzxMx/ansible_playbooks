@@ -2,44 +2,27 @@
 - import_tasks: debian.yml
   when: ansible_os_family == 'Debian'
 
-- shell: type kubectl
-  register: kubectl_result
-  ignore_errors: True
+- name: List kubeadm images
+  shell: kubeadm config images list
+  register: images_result
+  when: operation == 'list_kubeadm_images'
 
-- name: Install kubelet, kubeadm and kubectl
-  script: install_kubernetes.sh
-  environment: "{{ proxy_env | default({}) }}"
-  when: kubectl_result.rc != 0
-  become: true
-
-- name: Pull kubernetes images
-  shell: |
-    bash -c "
-    docker pull anjia0532/google-containers.{{ item }}:{{ kubernetes.version }}
-    docker tag anjia0532/google-containers.{{ item }}:{{ kubernetes.version }} k8s.gcr.io/{{ item  }}:{{ kubernetes.version }}
-    "
-  with_items:
-    - kube-apiserver
-    - kube-controller-manager
-    - kube-scheduler
-    - kube-proxy
-  become: true
-
-- name: Pull kubernetes dependent images
-  shell: |
-    bash -c "
-    docker pull anjia0532/google-containers.{{ item }}
-    docker tag anjia0532/google-containers.{{ item }} k8s.gcr.io/{{ item  }}
-    "
-  with_items: "{{ kubernetes.dep_images }}"
-  become: true
+- debug:
+    msg: '{{ item }}'
+  loop: '{{ images_result.stdout.splitlines() }}'
+  when: operation == 'list_kubeadm_images'
 
 - name: Turn off swap
   shell: swapoff -a 
   become: true
 
-- name: Run kubeadm init
-  script: kubeadm_init.sh
+- import_tasks: manager.yml
+  when: node == 'manager' and operation == 'default'
 
-- name: Schedule pods on the master
-  command: kubectl taint nodes --all node-role.kubernetes.io/master-
+- import_tasks: worker.yml
+  when: node == 'worker' and operation == 'default'
+
+- name: Run kubeadm reset
+  shell: kubeadm reset -f && rm -rf /home/{{ ansible_user_id }}/.kube
+  become: true
+  when: operation == 'reset'

@@ -1,0 +1,37 @@
+---
+- name: Pull kubernetes images
+  shell: |
+    bash -c "
+    docker pull anjia0532/google-containers.{{ item }}:{{ kubernetes.version }}
+    docker tag anjia0532/google-containers.{{ item }}:{{ kubernetes.version }} k8s.gcr.io/{{ item  }}:{{ kubernetes.version }}
+    "
+  with_items:
+    - kube-apiserver
+    - kube-controller-manager
+    - kube-scheduler
+    - kube-proxy
+  become: true
+
+- name: Pull kubernetes dependent images
+  shell: |
+    bash -c "
+    docker pull anjia0532/google-containers.{{ item }}
+    docker tag anjia0532/google-containers.{{ item }} k8s.gcr.io/{{ item  }}
+    "
+  with_items: "{{ kubernetes.dep_images }}"
+  become: true
+
+- name: Check kubeconfig
+  shell: test -f ~/.kube/config
+  register: kubeconfig_result
+  ignore_errors: true
+
+- name: Run kubeadm init
+  script: kubeadm_init.sh
+  environment:
+    api_server_advertise_address: "{{ kubernetes.kube_api_server.advertise_address }}"
+  when: kubeconfig_result.rc != 0
+
+- name: Schedule pods on the master
+  command: kubectl taint nodes --all node-role.kubernetes.io/master-
+  ignore_errors: true

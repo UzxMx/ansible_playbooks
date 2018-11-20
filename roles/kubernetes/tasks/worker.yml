@@ -1,0 +1,29 @@
+---
+- name: Pull kube-proxy image
+  shell: |
+    bash -c "
+    docker pull anjia0532/google-containers.{{ item }}:{{ kubernetes.version }}
+    docker tag anjia0532/google-containers.{{ item }}:{{ kubernetes.version }} k8s.gcr.io/{{ item  }}:{{ kubernetes.version }}
+    "
+  with_items:
+    - kube-proxy
+  become: true
+
+- name: Pull kubernetes worker dependent images
+  shell: |
+    bash -c "
+    docker pull anjia0532/google-containers.{{ item }}
+    docker tag anjia0532/google-containers.{{ item }} k8s.gcr.io/{{ item  }}
+    "
+  with_items: "{{ kubernetes.worker_dep_images }}"
+  become: true
+
+- name: Check if worker joins a cluster
+  shell: test -f /etc/kubernetes/bootstrap-kubelet.conf
+  register: join_result
+  ignore_errors: true
+
+- name: Join cluster
+  command: kubeadm join {{ kubernetes.kube_api_server.url }} --token {{ kubernetes.join_token }} --discovery-token-ca-cert-hash {{ kubernetes.join_discovery_token_ca_cert_hash }}
+  become: true
+  when: join_result.rc != 0

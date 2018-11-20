@@ -6,3 +6,28 @@
     - apt-transport-https
     - curl
   become: true
+
+- shell: test -f /etc/apt/sources.list.d/kubernetes.list
+  register: k8s_apt_source_result
+  ignore_errors: true
+
+- name: Configure kubernetes apt source
+  script: configure_k8s_apt_source.sh
+  # Uncomment the following line to enable proxy
+  # environment: "{{ proxy_env | default({}) }}"
+  when: k8s_apt_source_result.rc != 0
+  become: true
+
+- name: Install kubelet, kubeadm
+  apt: name={{ item }} state=present
+  with_items:
+    - kubelet
+    - kubeadm
+  become: true
+
+- name: Install kubectl
+  apt: name={{ item }} state=present
+  with_items:
+    - kubectl
+  become: true
+  when: node == 'manager'

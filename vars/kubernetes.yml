@@ -1,0 +1,14 @@
+---
+kubernetes:
+  version: v1.12.2
+  dep_images: 
+    - pause:3.1
+    - etcd:3.2.24
+    - coredns:1.2.2
+  worker_dep_images: 
+    - pause:3.1
+  kube_api_server:
+    advertise_address: '192.168.101.119'
+    url: '192.168.101.119:6443'
+  join_token: ''
+  join_discovery_token_ca_cert_hash: ''
