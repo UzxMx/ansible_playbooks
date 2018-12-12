@@ -2,13 +2,17 @@
 node: 'manager'
 operation: 'default'
 kubernetes:
-  version: v1.12.2
+  version: v1.13.0
   dep_images: 
     - pause:3.1
     - etcd:3.2.24
-    - coredns:1.2.2
+    - coredns:1.2.6
   worker_dep_images: 
     - pause:3.1
+  images:
+    - name: quay.mirrors.ustc.edu.cn/coreos/flannel:v0.10.0-amd64
+      tag: quay.io/coreos/flannel:v0.10.0-amd64
+  flannel_config_url: 'https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml'
   kube_api_server:
     advertise_address: ''
     url: ''

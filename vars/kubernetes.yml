@@ -1,12 +1,16 @@
 ---
 kubernetes:
-  version: v1.12.2
+  version: v1.13.0
   dep_images: 
     - pause:3.1
     - etcd:3.2.24
-    - coredns:1.2.2
+    - coredns:1.2.6
   worker_dep_images: 
     - pause:3.1
+  images:
+    - name: quay.mirrors.ustc.edu.cn/coreos/flannel:v0.10.0-amd64
+      tag: quay.io/coreos/flannel:v0.10.0-amd64
+  flannel_config_url: 'https://gist.githubusercontent.com/UzxMx/13fd0e914160620d762ecc6b16fe6166/raw/16e8e1ebd9e69adca0c218ffec9814e07a154937/kube-flannel-with-customized-iface.yml'
   kube_api_server:
     advertise_address: '192.168.101.119'
     url: '192.168.101.119:6443'

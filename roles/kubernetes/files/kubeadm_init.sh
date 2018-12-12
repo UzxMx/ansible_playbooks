@@ -14,4 +14,6 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 # When pulling image from quay.io/coreos/flannel, we may suffer from network problem, please try several times.
 #
 # CoreDNS will not be in running state until flannel is in running state. After the two are in running state, you're good to go.
-sudo kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
+#
+# Also make sure your default network interface of one flannel host can be reached by another flannel host. You can also specify a particular interface by passing `--iface` flag.
+sudo kubectl apply -f $flannel_config_url

@@ -2,8 +2,8 @@
 - name: Pull kubernetes images
   shell: |
     bash -c "
-    docker pull anjia0532/google-containers.{{ item }}:{{ kubernetes.version }}
-    docker tag anjia0532/google-containers.{{ item }}:{{ kubernetes.version }} k8s.gcr.io/{{ item  }}:{{ kubernetes.version }}
+    docker pull gcr.mirrors.ustc.edu.cn/google-containers/{{ item }}:{{ kubernetes.version }}
+    docker tag gcr.mirrors.ustc.edu.cn/google-containers/{{ item }}:{{ kubernetes.version }} k8s.gcr.io/{{ item  }}:{{ kubernetes.version }}
     "
   with_items:
     - kube-apiserver
@@ -15,11 +15,13 @@
 - name: Pull kubernetes dependent images
   shell: |
     bash -c "
-    docker pull anjia0532/google-containers.{{ item }}
-    docker tag anjia0532/google-containers.{{ item }} k8s.gcr.io/{{ item  }}
+    docker pull gcr.mirrors.ustc.edu.cn/google-containers/{{ item }}
+    docker tag gcr.mirrors.ustc.edu.cn/google-containers/{{ item }} k8s.gcr.io/{{ item  }}
     "
   with_items: "{{ kubernetes.dep_images }}"
   become: true
+
+- import_tasks: images.yml
 
 - name: Check kubeconfig
   shell: test -f ~/.kube/config
@@ -30,6 +32,7 @@
   script: kubeadm_init.sh
   environment:
     api_server_advertise_address: "{{ kubernetes.kube_api_server.advertise_address }}"
+    flannel_config_url: "{{ kubernetes.flannel_config_url }}"
   when: kubeconfig_result.rc != 0
 
 - name: Schedule pods on the master

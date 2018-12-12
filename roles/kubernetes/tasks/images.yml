@@ -1,0 +1,9 @@
+---
+- name: Pull images
+  shell: |
+    bash -c "
+    docker pull {{ item.name }}
+    docker tag {{ item.name }} {{ item.tag }}
+    "
+  with_items: "{{ kubernetes.images }}"
+  become: true

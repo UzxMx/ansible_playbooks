@@ -2,8 +2,8 @@
 - name: Pull kube-proxy image
   shell: |
     bash -c "
-    docker pull anjia0532/google-containers.{{ item }}:{{ kubernetes.version }}
-    docker tag anjia0532/google-containers.{{ item }}:{{ kubernetes.version }} k8s.gcr.io/{{ item  }}:{{ kubernetes.version }}
+    docker pull gcr.mirrors.ustc.edu.cn/google-containers/{{ item }}:{{ kubernetes.version }}
+    docker tag gcr.mirrors.ustc.edu.cn/google-containers/{{ item }}:{{ kubernetes.version }} k8s.gcr.io/{{ item  }}:{{ kubernetes.version }}
     "
   with_items:
     - kube-proxy
@@ -12,11 +12,13 @@
 - name: Pull kubernetes worker dependent images
   shell: |
     bash -c "
-    docker pull anjia0532/google-containers.{{ item }}
-    docker tag anjia0532/google-containers.{{ item }} k8s.gcr.io/{{ item  }}
+    docker pull gcr.mirrors.ustc.edu.cn/google-containers/{{ item }}
+    docker tag gcr.mirrors.ustc.edu.cn/google-containers/{{ item }} k8s.gcr.io/{{ item  }}
     "
   with_items: "{{ kubernetes.worker_dep_images }}"
   become: true
+
+- import_tasks: images.yml
 
 - name: Check if worker joins a cluster
   shell: test -f /etc/kubernetes/bootstrap-kubelet.conf
