@@ -3,15 +3,15 @@ node: 'manager'
 operation: 'default'
 kubernetes:
   version: v1.13.1
-  mirror: gcr.mirrors.ustc.edu.cn/google-containers
+  mirror: mirrorgooglecontainers
   images:
-    - name: gcr.mirrors.ustc.edu.cn/google-containers/pause:3.1
+    - name: mirrorgooglecontainers/pause:3.1
       tag: k8s.gcr.io/pause:3.1
-    - name: gcr.mirrors.ustc.edu.cn/google-containers/etcd:3.2.24
+    - name: mirrorgooglecontainers/etcd:3.2.24
       tag: k8s.gcr.io/etcd:3.2.24
-    - name: gcr.mirrors.ustc.edu.cn/google-containers/coredns:1.2.6
+    - name: coredns/coredns:1.2.6
       tag: k8s.gcr.io/coredns:1.2.6
-    - name: quay.mirrors.ustc.edu.cn/coreos/flannel:v0.10.0-amd64
+    - name: fishead/quay.io.coreos.flannel:v0.10.0-amd64
       tag: quay.io/coreos/flannel:v0.10.0-amd64
   flannel_config_url: 'https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml'
   kube_api_server:
