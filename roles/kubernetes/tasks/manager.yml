@@ -2,23 +2,14 @@
 - name: Pull kubernetes images
   shell: |
     bash -c "
-    docker pull gcr.mirrors.ustc.edu.cn/google-containers/{{ item }}:{{ kubernetes.version }}
-    docker tag gcr.mirrors.ustc.edu.cn/google-containers/{{ item }}:{{ kubernetes.version }} k8s.gcr.io/{{ item  }}:{{ kubernetes.version }}
+    docker pull {{ kubernetes.mirror }}/{{ item }}:{{ kubernetes.version }}
+    docker tag {{ kubernetes.mirror }}/{{ item }}:{{ kubernetes.version }} k8s.gcr.io/{{ item  }}:{{ kubernetes.version }}
     "
   with_items:
     - kube-apiserver
     - kube-controller-manager
     - kube-scheduler
     - kube-proxy
-  become: true
-
-- name: Pull kubernetes dependent images
-  shell: |
-    bash -c "
-    docker pull gcr.mirrors.ustc.edu.cn/google-containers/{{ item }}
-    docker tag gcr.mirrors.ustc.edu.cn/google-containers/{{ item }} k8s.gcr.io/{{ item  }}
-    "
-  with_items: "{{ kubernetes.dep_images }}"
   become: true
 
 - import_tasks: images.yml

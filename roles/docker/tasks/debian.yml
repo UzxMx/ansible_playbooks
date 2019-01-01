@@ -4,3 +4,8 @@
   with_items:
     - docker.io
   become: true
+
+# https://askubuntu.com/questions/477551/how-can-i-use-docker-without-sudo
+- name: Ensure current user belong to docker group
+  shell: gpasswd -a {{ ansible_user_id }} docker
+  become: true
