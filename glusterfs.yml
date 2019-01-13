@@ -1,0 +1,12 @@
+---
+- hosts: glusterfs-client
+  vars:
+    install_client: true
+  roles:
+  - role: glusterfs
+
+- hosts: glusterfs-server
+  vars:
+    install_server: true
+  roles:
+  - role: glusterfs

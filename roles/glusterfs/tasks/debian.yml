@@ -1,0 +1,18 @@
+---
+- name: Add the GPG key to apt
+  shell: wget -O - http://download.gluster.org/pub/gluster/glusterfs/3.10/rsa.pub | apt-key add -
+  become: true
+
+- name: Add the source
+  shell: echo deb [arch=amd64] http://download.gluster.org/pub/gluster/glusterfs/3.10/LATEST/Debian/jessie/apt jessie main > /etc/apt/sources.list.d/gluster.list
+  become: true
+
+- name: Install glusterfs-client
+  apt: name=glusterfs-client state=present
+  become: true
+  when: install_client == true
+
+- name: Install glusterfs-server
+  apt: name=glusterfs-server state=present
+  become: true
+  when: install_server == true
