@@ -1,12 +1,4 @@
 ---
-- name: Install dependencies
-  apt: name={{ item }} state=present
-  with_items:
-    - docker.io
-    - apt-transport-https
-    - curl
-  become: true
-
 - shell: test -f /etc/apt/sources.list.d/kubernetes.list
   register: k8s_apt_source_result
   ignore_errors: true
