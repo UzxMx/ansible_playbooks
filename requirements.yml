@@ -3,3 +3,6 @@
   name: rbenv
 - src: https://github.com/jlund/ansible-go
   name: go
+- src: https://github.com/geerlingguy/ansible-role-docker
+  version: 2.5.2
+  name: docker

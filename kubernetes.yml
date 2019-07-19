@@ -1,13 +1,9 @@
 ---
 - hosts: manager
-  # vars:
-  #   proxy_env:
-  #     HTTP_PROXY: http://192.168.1.3:8123
-  #     HTTPS_PROXY: https://192.168.1.3:8123
   vars_files:
     - local_vars/kubernetes.yml
   roles:
-    - role: docker
+    # - role: docker
     - role: kubernetes
       node: manager
   tags: manager
@@ -16,21 +12,21 @@
   vars_files:
     - local_vars/kubernetes.yml
   roles:
-    - role: docker
+    # - role: docker
     - role: kubernetes
       node: worker
   tags: worker
 
 - hosts: reset
   roles:
-    - role: docker
+    # - role: docker
     - role: kubernetes
       operation: reset
   tags: reset
 
 - hosts: list_kubeadm_images
   roles:
-    - role: docker
+    # - role: docker
     - role: kubernetes
       operation: list_kubeadm_images
   tags: list_kubeadm_images
