@@ -1,0 +1,50 @@
+---
+- shell: type zsh
+  register: zsh_result
+  ignore_errors: true
+
+- name: Download zsh source
+  shell: curl -O https://nchc.dl.sourceforge.net/project/zsh/zsh/{{ zsh.version }}/zsh-{{ zsh.version }}.tar.xz
+  args:
+    chdir: /tmp
+  when: zsh_result.rc != 0
+
+- name: Extract zsh tar
+  unarchive:
+    src: /tmp/zsh-{{ zsh.version }}.tar.xz
+    dest: /tmp
+    remote_src: true
+  when: zsh_result.rc != 0
+
+- name: Make and install zsh
+  shell: ./configure && make && make install
+  args:
+    chdir: /tmp/zsh-{{ zsh.version }}
+  become: true
+  when: zsh_result.rc != 0
+
+- name: Clean
+  file: path={{ item }} state=absent
+  with_items:
+    - /tmp/zsh-{{ zsh.version }}.tar.xz
+    - /tmp/zsh-{{ zsh.version }}
+  when: zsh_result.rc != 0
+
+- name: Check current shell
+  shell: test $(echo $SHELL) = $(which zsh)
+  register: check_result
+
+- name: Append zsh to /etc/shells
+  shell: |
+    path=$(which zsh)
+    if ! $(grep $path /etc/shells &>/dev/null); then
+      echo $path | sudo tee -a /etc/shells >/dev/null
+    fi
+  when: check_result.rc != 0
+
+- name: Change shell to zsh
+  expect:
+    command: bash -c "chsh -s $(which zsh)"
+    responses:
+      Password: "{{ zsh.password }}"
+  when: check_result.rc != 0

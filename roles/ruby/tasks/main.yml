@@ -1,0 +1,7 @@
+---
+- shell: type ruby
+  register: ruby_result
+  ignore_errors: True
+
+- import_tasks: redhat.yml
+  when: ruby_result.rc != 0 and ansible_os_family == 'RedHat'

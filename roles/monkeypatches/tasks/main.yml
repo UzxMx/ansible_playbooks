@@ -1,0 +1,10 @@
+---
+- include_role:
+    name: pip
+  become: true
+
+- name: Install pexpect
+  pip:
+    name: pexpect
+  become: true
+

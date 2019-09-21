@@ -1,0 +1,15 @@
+- name: Ensure wget
+  yum:
+    name: wget
+    state: present
+  become: true
+
+- name: Download repo
+  shell: cd /etc/yum.repos.d/ && wget https://download.opensuse.org/repositories/utilities/RHEL_7/utilities.repo
+  become: true
+
+- name: Install rcm
+  yum:
+    name: rcm
+    state: present
+  become: true

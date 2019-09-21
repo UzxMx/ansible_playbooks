@@ -21,3 +21,11 @@
     - liblua5.1-dev
     - libperl-dev
   become: true
+
+- name: Remove existing vim
+  apt: name={{ item }} state=absent
+  with_items:
+    - vim
+    - vim-runtime
+    - gvim
+  become: true

@@ -3,4 +3,7 @@
   ignore_errors: True
 
 - import_tasks: debian.yml
-  when: ansible_os_family == 'Debian'
+  when: rcup_result.rc != 0 and ansible_os_family == 'Debian'
+
+- import_tasks: redhat.yml
+  when: rcup_result.rc != 0 and ansible_os_family == 'RedHat'

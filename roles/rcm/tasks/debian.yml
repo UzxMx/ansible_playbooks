@@ -5,4 +5,3 @@
     apt-get update
     apt-get install -y rcm
   become: true
-  when: rcup_result.rc != 0

@@ -1,0 +1,6 @@
+---
+- name: Install ruby
+  yum:
+    name: ruby
+    state: present
+  become: true

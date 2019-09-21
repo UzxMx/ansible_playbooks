@@ -1,0 +1,14 @@
+---
+- shell: type nvim
+  register: nvim_result
+  ignore_errors: True
+
+- import_tasks: install_from_source.yml
+  when: nvim_result.rc != 0 and nvim.install_from_source
+
+- name: Install nvim
+  shell: |
+    yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    yum install -y neovim python3-neovim
+  become: true
+  when: nvim_result.rc != 0 and ansible_os_family == 'RedHat'

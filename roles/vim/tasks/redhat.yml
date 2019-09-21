@@ -1,0 +1,29 @@
+---
+- name: Install dependencies
+  yum: name={{ item }} state=present
+  with_items:
+    - ruby
+    - ruby-devel
+    - lua
+    - lua-devel
+    - ctags
+    - git
+    - python
+    - python-devel
+    - python3
+    - python3-devel
+    - tcl-devel
+    - perl
+    - perl-devel
+    - perl-ExtUtils-ParseXS
+    - perl-ExtUtils-CBuilder
+    - perl-ExtUtils-Embed
+  become: true
+
+- name: Remove existing vim
+  yum: name={{ item }} state=absent
+  with_items:
+    - vim
+    - vim-runtime
+    - gvim
+  become: true
