@@ -1,0 +1,8 @@
+---
+- name: Install dependencies
+  package: name={{ item }} state=present
+  with_items:
+    - make
+    - gcc
+    - ncurses-devel
+  become: true

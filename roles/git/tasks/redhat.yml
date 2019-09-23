@@ -1,0 +1,10 @@
+---
+- name: Install dependencies
+  package: name={{ item }} state=present
+  with_items:
+    - make
+    - autoconf
+    - gcc
+    - zlib-devel
+    - curl-devel
+  become: true

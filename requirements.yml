@@ -6,9 +6,6 @@
 - src: https://github.com/geerlingguy/ansible-role-docker
   version: 2.5.2
   name: docker
-# - src: https://github.com/geerlingguy/ansible-role-git
-#   version: 2.0.5
-#   name: git
 - src: https://github.com/morgangraphics/ansible-role-nvm
   name: nvm
 - src: https://github.com/azavea/ansible-pip

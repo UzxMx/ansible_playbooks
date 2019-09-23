@@ -16,12 +16,8 @@
     remote_src: true
   when: git_result.rc != 0
 
-- name: Install dependencies
-  package:
-    name: autoconf
-    state: present
-  become: true
-  when: git_result.rc != 0
+- import_tasks: redhat.yml
+  when: git_result.rc != 0 and ansible_os_family == 'RedHat'
 
 - name: Make and install git
   shell: make configure && ./configure && make && sudo make install

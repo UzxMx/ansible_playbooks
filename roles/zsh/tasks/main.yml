@@ -16,6 +16,9 @@
     remote_src: true
   when: zsh_result.rc != 0
 
+- import_tasks: redhat.yml
+  when: zsh_result.rc != 0 and ansible_os_family == 'RedHat'
+
 - name: Make and install zsh
   shell: ./configure && make && make install
   args:
@@ -33,6 +36,7 @@
 - name: Check current shell
   shell: test $(echo $SHELL) = $(which zsh)
   register: check_result
+  ignore_errors: true
 
 - name: Append zsh to /etc/shells
   shell: |

@@ -2,7 +2,9 @@
 - hosts: dotfiles
   tasks:
     - name: setup proxy for curl
-      shell: echo "proxy = {{ curl_proxy }}" >~/.curlrc
+      shell: |
+        echo "proxy = {{ curl_proxy }}" >~/.curlrc
+        echo "proxy = {{ curl_proxy }}" | sudo tee /root/.curlrc >/dev/null
       when: curl_proxy and curl_proxy | length > 0
 
 - hosts: dotfiles
@@ -35,21 +37,41 @@
           default_ruby: 2.6.4
           rubies:
             - version: 2.6.4
+              env:
+                # When rbenv invokes curl, it uses `-q` to disable curlrc loading, so we have to pass proxy as argument.
+                RUBY_BUILD_CURL_OPTS: "{{ '--proxy ' + curl_proxy if curl_proxy and curl_proxy | length > 0 }}"
         rbenv_users: ['{{ ansible_user_id }}']
     - role: nvm
 
 - hosts: dotfiles
   tasks:
-    - name: clone dotfiles
-      git:
-        repo: "https://github.com/uzxmx/dotfiles.git"
-        dest: ~/.dotfiles
-        accept_hostkey: true
-        clone: true
-        force: true
-        depth: 1
+    - name: clone or update dotfiles
+      shell: |
+        if $(test -d ~/.dotfiles && cd ~/.dotfiles && git status &>/dev/null); then
+          cd ~/.dotfiles
+          if [ -n $(git config --global --get http.proxy) ]; then
+            git config http.proxy $(git config --global --get http.proxy)
+            http_proxy_configured=1
+          fi
+          if [ -n $(git config --global --get https.proxy) ]; then
+            git config https.proxy $(git config --global --get https.proxy)
+            https_proxy_configured=1
+          fi
+          git stash
+          git pull --all --recurse-submodules --rebase
+          git stash pop
+          if [ "$http_proxy_configured" = "1" ]; then
+            git config --unset http.proxy
+          fi
+          if [ "$https_proxy_configured" = "1" ]; then
+            git config --unset https.proxy
+          fi
+        else
+          rm -rf ~/.dotfiles
+          git clone --depth 1 --recurse-submodules https://github.com/uzxmx/dotfiles.git ~/.dotfiles
+        fi
     - name: run rcup
-      shell: env RCRC=~/.dotfiles/rcrc rcup -f
+      shell: env RCRC=$(ls -d ~)/.dotfiles/rcrc rcup -f
     - name: install vim plugins
       shell: vim '+PlugInstall' '+qa'
 
@@ -65,5 +87,7 @@
 - hosts: dotfiles
   tasks:
     - name: unset proxy for curl
-      shell: rm ~/.curlrc
+      shell: |
+        rm ~/.curlrc
+        sudo rm /root/.curlrc
       when: curl_proxy and curl_proxy | length > 0
