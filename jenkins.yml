@@ -1,0 +1,100 @@
+---
+- hosts: jenkins
+  tags: jenkins
+  tasks:
+    - name: create jenkins home directory
+      command: mkdir -p /mnt/data/jenkins
+      become: true
+    - include_role:
+        name: jenkins
+        apply:
+          become: true
+      vars:
+        jenkins_hostname: localhost
+        jenkins_home: /mnt/data/jenkins
+        # If we set port to 80, then jenkins will fail to start due to no permission.
+        jenkins_http_port: 8080
+        jenkins_admin_username: admin
+        jenkins_plugins: ["ssh-agent", "rbenv", "git", "pyenv", "nvm-wrapper", "build-pipeline-plugin", "copyartifact"]
+        jenkins_plugin_timeout: 300
+    - name: install dependencies when using jenkins plugins
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - openssl-devel
+        - readline-devel
+      become: true
+
+- hosts: jenkins
+  tags: nginx
+  tasks:
+    - set_fact:
+        enable_ssl: "{{ enable_ssl | default(False) }}"
+    - set_fact:
+        jenkins_ssl:
+          cert: "{{ jenkins_ssl_cert | default('/etc/ssl/certs/default.crt') }}" 
+          key: "{{ jenkins_ssl_key | default('/etc/ssl/private/default.key') }}"
+          protocols: TLSv1 TLSv1.1 TLSv1.2
+          prefer_server_ciphers: true
+          session_cache: none
+          session_timeout: 5m
+        jenkins_listen:
+          listen_80:
+            ip: 0.0.0.0
+            port: 80
+          listen_443:
+            ip: 0.0.0.0
+            port: 443
+            opts:
+              - default_server
+      when: enable_ssl | bool
+    - set_fact:
+        jenkins_listen:
+          listen_80:
+            ip: 0.0.0.0
+            port: 80
+            opts:
+              - default_server
+      when: not enable_ssl | bool
+    - include_role:
+        name: nginx
+        apply:
+          become: true
+      vars:
+        nginx_http_template_enable: true
+        nginx_http_template:
+          jenkins:
+            template_file: nginx/http/default.conf.j2
+            conf_file_name: jenkins.conf
+            conf_file_location: /etc/nginx/conf.d/
+            listen: "{{ jenkins_listen }}"
+            server_name: "{{ jenkins_server_name | default('localhost') }}"
+            https_redirect: "{{ enable_ssl | bool }}"
+            error_page: /usr/share/nginx/html
+            autoindex: false
+            ssl: "{{ jenkins_ssl | default(None) }}"
+            reverse_proxy:
+              locations:
+                jenkins:
+                  location: /
+                  proxy_pass: http://jenkins
+                  proxy_set_header:
+                    header_host:
+                      name: Host
+                      value: $host
+                    header_x_forwarded_proto:
+                      name: X-Forwarded-Proto
+                      value: $scheme
+            upstreams:
+              upstream_1:
+                name: jenkins
+                lb_method: least_conn
+                zone_name: jenkins
+                zone_size: 64k
+                sticky_cookie: false
+                servers:
+                  jenkins:
+                    address: 0.0.0.0
+                    port: 8080
+                    weight: 1

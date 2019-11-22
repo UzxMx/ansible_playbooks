@@ -17,3 +17,9 @@
 - src: https://github.com/linuxhq/ansible-role-ius
   version: v0.0.8
   name: repo-ius
+- src: https://github.com/geerlingguy/ansible-role-jenkins
+  version: 3.8.0
+  name: jenkins
+- src: https://github.com/nginxinc/ansible-role-nginx
+  version: 7785babce1953c7602245bf8bcc66bd7cddbf1e4
+  name: nginx
