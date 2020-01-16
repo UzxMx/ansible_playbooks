@@ -44,6 +44,17 @@ EOF
 ansible-playbook -i hosts dotfiles.yml
 ```
 
+### users
+
+```
+cat <<EOF >hosts
+[users]
+192.168.1.2
+EOF
+
+ansible-playbook -i hosts -u root --private-key <path-to-private-key-file> users.yml
+```
+
 ### jenkins
 
 ```
@@ -73,4 +84,22 @@ ansible-playbook -i hosts -t nginx \
   -e jenkins_ssl_cert=path-to-ssl-cert \
   -e jenkins_ssl_key=path-to-ssl-key \
   jenkins.yml
+```
+
+### jumpserver
+
+```
+cat <<EOF >hosts
+[jumpserver]
+192.168.1.2
+EOF
+
+ansible-playbook -i hosts -u jumpserver \
+  -e mysql_root_password=<root-password> \
+  -e mysql_user_password=<user-password> \
+  -e jumpserver_secret_key=<secret-key> \
+  -e jumpserver_bootstrap_token=<bootstrap-token> \
+  jumpserver.yml
+
+ansible-playbook -i hosts -u jumpserver -t nginx -e enable_ssl=true jumpserver.yml
 ```

@@ -48,7 +48,7 @@
 
 - name: Change shell to zsh
   expect:
-    command: bash -c "chsh -s $(which zsh)"
+    command: bash -c "LANG=en_US chsh -s $(which zsh)"
     responses:
       Password: "{{ zsh.password }}"
   when: check_result.rc != 0

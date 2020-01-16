@@ -29,19 +29,6 @@
     - tmux
     - vim
     - nvim
-    - role: rbenv
-      vars:
-        rbenv:
-          env: user
-          version: v1.0.0
-          default_ruby: 2.6.4
-          rubies:
-            - version: 2.6.4
-              env:
-                # When rbenv invokes curl, it uses `-q` to disable curlrc loading, so we have to pass proxy as argument.
-                RUBY_BUILD_CURL_OPTS: "{{ '--proxy ' + curl_proxy if curl_proxy and curl_proxy | length > 0 }}"
-        rbenv_users: ['{{ ansible_user_id }}']
-    - role: nvm
 
 - hosts: dotfiles
   tasks:
@@ -66,12 +53,13 @@
           if [ "$https_proxy_configured" = "1" ]; then
             git config --unset https.proxy
           fi
+          true
         else
           rm -rf ~/.dotfiles
           git clone --depth 1 --recurse-submodules https://github.com/uzxmx/dotfiles.git ~/.dotfiles
         fi
     - name: run rcup
-      shell: env RCRC=$(ls -d ~)/.dotfiles/rcrc rcup -f
+      shell: zsh -ic "env RCRC=$(ls -d ~)/.dotfiles/rcrc rcup -f"
     - name: install vim plugins
       shell: vim '+PlugInstall' '+qa'
 
