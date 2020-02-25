@@ -1,0 +1,13 @@
+---
+- name: Download nvim
+  command: curl -L -C - -o /tmp/nvim.tar.gz https://github.com/neovim/neovim/releases/download/v{{ nvim.version }}/nvim-linux64.tar.gz
+  become: true
+  when: ansible_os_family == 'RedHat'
+
+- name: Install nvim
+  command: tar zxf /tmp/nvim.tar.gz -C /usr --strip-components=1
+  become: true
+
+- name: Clean
+  command: rm /tmp/nvim.tar.gz
+  become: true

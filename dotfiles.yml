@@ -27,7 +27,6 @@
 - hosts: dotfiles
   roles:
     - tmux
-    - vim
     - nvim
 
 - hosts: dotfiles
@@ -59,9 +58,21 @@
           git clone --depth 1 --recurse-submodules https://github.com/uzxmx/dotfiles.git ~/.dotfiles
         fi
     - name: run rcup
-      shell: zsh -ic "env RCRC=$(ls -d ~)/.dotfiles/rcrc rcup -f"
+      shell: zsh -ic "env RCRC=$(ls -d ~)/.dotfiles/rcrc rcup -f" >/tmp/rcup.log 2>&1
+    - name: replace asdf-exec
+      shell: |
+        if [ ! -e ~/.asdf/bin/private/asdf-exec ] || file -b ~/.asdf/bin/private/asdf-exec | grep 'ASCII text' &>/dev/null; then
+          rm -f ~/.asdf/bin/private/asdf-exec
+          curl -L -o ~/.asdf/bin/private/asdf-exec https://github.com/danhper/asdf-exec/releases/download/v0.1.2/asdf-exec-linux-x64
+          chmod a+x ~/.asdf/bin/private/asdf-exec
+          sed -i.bak -e 's|exec $(asdf_dir)/bin/asdf exec|exec $(asdf_dir)/bin/private/asdf-exec|' ~/.asdf/lib/commands/reshim.sh
+          rm ~/.asdf/shims/*
+          zsh -ic "asdf reshim"
+        else
+          true
+        fi
     - name: install vim plugins
-      shell: vim '+PlugInstall' '+qa'
+      shell: zsh -ic "vi '+PlugInstall' '+qa'"
 
 - hosts: dotfiles
   tasks:

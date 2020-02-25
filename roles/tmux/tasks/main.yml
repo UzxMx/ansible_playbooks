@@ -10,7 +10,7 @@
   ignore_errors: True
 
 - name: Download tmux source
-  shell: git clone --branch 2.7 --depth 1 https://github.com/tmux/tmux.git /tmp/tmux
+  shell: git clone --branch 3.0a --depth 1 https://github.com/tmux/tmux.git /tmp/tmux
   args:
     creates: /tmp/tmux/
   when: tmux_result.rc != 0

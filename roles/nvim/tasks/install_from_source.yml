@@ -11,14 +11,12 @@
     clone: true
     force: true
     depth: 1
-  when: nvim_result.rc != 0
 
 - name: Make and install nvim
   shell: make CMAKE_BUILD_TYPE=Release && make install
   args:
     chdir: /tmp/nvim
   become: true
-  when: nvim_result.rc != 0
 
 - name: Clean
   file:

@@ -5,6 +5,7 @@
     - automake
     - libevent
     - libevent-devel
+    - byacc
   become: true
 
 - name: Remove tmux
