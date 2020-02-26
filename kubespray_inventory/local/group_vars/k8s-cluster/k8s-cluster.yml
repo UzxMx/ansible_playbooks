@@ -227,13 +227,13 @@ kubedns_image_repo: "dockerhub.azk8s.cn/mirrorgooglecontainers/k8s-dns-kube-dns-
 dashboard_image_repo: "dockerhub.azk8s.cn/mirrorgooglecontainers/kubernetes-dashboard-{{ image_arch }}"
 tiller_image_repo: "dockerhub.azk8s.cn/sapcc/tiller"
 
-addon_resizer_image_repo: "dockerhub.azk8s.cn/googlecontainer/addon-resizer"
-metrics_server_image_repo: "dockerhub.azk8s.cn/googlecontainer/metrics-server-amd64"
+addon_resizer_image_repo: "dockerhub.azk8s.cn/mirrorgooglecontainers/addon-resizer"
+metrics_server_image_repo: "dockerhub.azk8s.cn/mirrorgooglecontainers/metrics-server-amd64"
 
 # kubeadm_download_url: "http://global-thecarevoice-com.oss-cn-hongkong.aliyuncs.com/kubernetes-release/release/{{ kubeadm_version }}/bin/linux/{{ image_arch }}/kubeadm"
 # hyperkube_download_url: "http://global-thecarevoice-com.oss-cn-hongkong.aliyuncs.com/kubernetes-release/release/{{ kube_version }}/bin/linux/{{ image_arch }}/hyperkube"
 
-etcd_image_repo: "quay.mirrors.ustc.edu.cn/coreos/etcd"
+etcd_image_repo: "quay.azk8s.cn/coreos/etcd"
 helm_image_repo: "dockerhub.azk8s.cn/lachlanevenson/k8s-helm"
 nginx_image_repo: "dockerhub.azk8s.cn/library/nginx"
 calico_policy_image_repo: "quay.azk8s.cn/calico/kube-controllers"
