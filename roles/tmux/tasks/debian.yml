@@ -8,6 +8,7 @@
     - pkg-config
     - libevent-dev
     - libncurses5-dev
+    - byacc
   become: true
 
 - name: Remove tmux
