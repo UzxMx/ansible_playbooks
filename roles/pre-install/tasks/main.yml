@@ -1,0 +1,76 @@
+---
+- name: Update apt sources
+  shell: |
+    sed -i.bak -Ee 's:[0-9a-zA-Z]+\.ubuntu\.com/ubuntu/:mirrors.tuna.tsinghua.edu.cn/ubuntu/:' /etc/apt/sources.list
+    apt-get update
+  become: true
+  when: ansible_os_family == 'Debian'
+
+- name: Update yum base repo
+  shell: |
+    sed -i.bak -e 's;^mirrorlist=;#mirrorlist=;' -e 's;^#baseurl=http://mirror\.centos\.org;baseurl=https://mirrors.tuna.tsinghua.edu.cn;' /etc/yum.repos.d/CentOS-Base.repo
+    yum makecache
+  become: true
+  when: ansible_os_family == 'RedHat'
+
+- name: Install epel-release
+  package:
+    name: epel-release
+    state: present
+  become: true
+  when: ansible_os_family == 'RedHat'
+
+- name: Update yum epel and ius repo
+  shell: |
+    sed -i.bak -e 's;^metalink=;#metalink=;' \
+      -e 's;^#baseurl=http://download\.fedoraproject\.org/pub;baseurl=https://mirrors.tuna.tsinghua.edu.cn;' \
+      /etc/yum.repos.d/epel.repo \
+      /etc/yum.repos.d/epel-testing.repo
+    yum -y install  https://centos7.iuscommunity.org/ius-release.rpm
+    sed -i.bak -e 's;^baseurl = https://repo\.ius\.io;baseurl = https://mirrors.tuna.tsinghua.edu.cn/ius;' \
+      /etc/yum.repos.d/ius.repo
+  become: true
+  when: ansible_os_family == 'RedHat'
+
+# This task must run before updating yum vault repo.
+- name: Install centos release
+  package:
+    name: centos-release
+    state: present
+  become: true
+  when: ansible_os_family == 'RedHat'
+
+- name: Update yum vault repo
+  shell: |
+    sed -i.bak -e 's;http://vault.centos.org;https://mirrors.tuna.tsinghua.edu.cn/centos-vault;' \
+      /etc/yum.repos.d/CentOS-Vault.repo
+  become: true
+  when: ansible_os_family == 'RedHat'
+
+- name: Install pip
+  package:
+    name: python-pip
+    state: present
+  become: true
+
+- name: Upgrade pip
+  shell: pip install -i https://pypi.tuna.tsinghua.edu.cn/simple pip -U
+  become: true
+
+- name: Use tsinghua mirror as pip source
+  shell: pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+  become: true
+
+- name: Install pexpect
+  pip:
+    name: pexpect
+  become: true
+
+- name: Install tools
+  yum: name={{ item }} state=present
+  with_items:
+    - bind-utils # provides dig
+    - net-tools # provides route
+    - tcpdump
+  become: true
+  when: ansible_os_family == 'RedHat'

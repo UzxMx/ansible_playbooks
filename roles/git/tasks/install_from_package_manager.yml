@@ -1,0 +1,5 @@
+---
+- yum:
+    name: git2u-all
+    state: present
+  become: true

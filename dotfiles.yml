@@ -7,45 +7,40 @@
     - set_fact:
         local: "{{ ansible_connection == 'local' }}"
         wsl: "{{ result.rc == 0 }}"
-    - name: Update apt sources
-      shell: |
-        sed -i.bak -Ee 's:[0-9a-zA-Z]+\.ubuntu\.com/ubuntu/:mirrors.tuna.tsinghua.edu.cn/ubuntu/:' /etc/apt/sources.list
-        apt-get update
-      become: true
-      when: ansible_os_family == 'Debian'
-    - name: setup proxy for curl
-      shell: echo "proxy = {{ curl_proxy }}" >~/.curlrc
-      when: curl_proxy is defined and curl_proxy | length > 0
-    - name: setup proxy for curl as root
-      shell: echo "proxy = {{ curl_proxy }}" >/root/.curlrc
-      become: true
-      when: curl_proxy is defined and curl_proxy | length > 0
+    - include_role:
+        name: proxy
+        apply:
+          tags: proxy
+      vars:
+        unset_proxy: true
+      tags: proxy
+    - include_role:
+        name: proxy
+        apply:
+          tags: proxy
+      vars:
+        set_proxy: true
+      tags: proxy
 
 - hosts: "{{ host | default('dotfiles') }}"
   roles:
-    - role: monkeypatches
-      become: true
-      when: not local
+    - pre-install
     - git
+    - role: proxy
+      vars:
+        set_proxy: true
+      tags: proxy
     - zsh
     - rcm
-
-- hosts: "{{ host | default('dotfiles') }}"
-  tasks:
-    - name: set git http proxy
-      shell: git config --global http.proxy {{ git_http_proxy }}
-      when: git_http_proxy is defined and git_http_proxy | length > 0
-    - name: set git https proxy
-      shell: git config --global https.proxy {{ git_https_proxy }}
-      when: git_https_proxy is defined and git_https_proxy | length > 0
-
-- hosts: "{{ host | default('dotfiles') }}"
-  roles:
     - tmux
     - nvim
 
 - hosts: "{{ host | default('dotfiles') }}"
   tasks:
+    - name: clone dotfiles for local
+      shell: test -d ~/.dotfiles || git clone git@github.com:uzxmx/dotfiles.git ~/.dotfiles
+      when: local is defined and local
+      tags: dotfiles
     - name: clone or update dotfiles
       shell: |
         if $(test -d ~/.dotfiles && cd ~/.dotfiles && git status &>/dev/null); then
@@ -72,9 +67,11 @@
           rm -rf ~/.dotfiles
           git clone --depth 1 --recurse-submodules https://github.com/uzxmx/dotfiles.git ~/.dotfiles
         fi
-      when: not local
+      when: local is not defined or not local
+      tags: dotfiles
     - name: run rcup
       shell: zsh -ic "env RCRC=$(ls -d ~)/.dotfiles/rcrc rcup -f" >/tmp/rcup.log 2>&1
+      tags: dotfiles
     # - name: replace asdf-exec
     #   shell: |
     #     if [ ! -e ~/.asdf/bin/private/asdf-exec ] || file -b ~/.asdf/bin/private/asdf-exec | grep 'ASCII text' &>/dev/null; then
@@ -89,6 +86,7 @@
     #     fi
     - name: install vim plugins
       shell: zsh -ic "vi '+PlugInstall' '+qa'"
+      tags: dotfiles
 
 - hosts: "{{ host | default('dotfiles') }}"
   tasks:
@@ -98,21 +96,12 @@
         - tcllib
       become: true
       when: wsl
-  roles:
-    - ssh
-
-- hosts: "{{ host | default('dotfiles') }}"
-  tasks:
-    - name: unset git http proxy
-      shell: git config --global --unset http.proxy
-      when: git_http_proxy is defined and git_http_proxy | length > 0
-    - name: unset git https proxy
-      shell: git config --global --unset https.proxy
-      when: git_https_proxy is defined and git_https_proxy | length > 0
-    - name: unset proxy for curl
-      shell: rm ~/.curlrc
-      when: curl_proxy is defined and curl_proxy | length > 0
-    - name: unset proxy for curl as root
-      shell: rm /root/.curlrc
-      become: true
-      when: curl_proxy is defined and curl_proxy | length > 0
+    - include_role:
+        name: ssh
+    - include_role:
+        name: proxy
+        apply:
+          tags: proxy
+      vars:
+        unset_proxy: true
+      tags: proxy

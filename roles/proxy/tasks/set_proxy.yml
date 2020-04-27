@@ -1,0 +1,19 @@
+---
+- name: setup proxy for curl
+  shell: echo "proxy = {{ curl_proxy }}" >~/.curlrc
+  when: curl_proxy is defined and curl_proxy and curl_proxy | length > 0
+
+- name: setup proxy for curl as root
+  shell: echo "proxy = {{ curl_proxy }}" >/root/.curlrc
+  become: true
+  when: curl_proxy is defined and curl_proxy and curl_proxy | length > 0
+
+- name: set git http proxy
+  shell: git config --global http.proxy {{ git_http_proxy }}
+  when: git_http_proxy is defined and git_http_proxy and git_http_proxy | length > 0
+  ignore_errors: true
+
+- name: set git https proxy
+  shell: git config --global https.proxy {{ git_https_proxy }}
+  when: git_https_proxy is defined and git_https_proxy and git_https_proxy | length > 0
+  ignore_errors: true

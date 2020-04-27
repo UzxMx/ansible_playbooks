@@ -1,0 +1,17 @@
+---
+- name: unset git http proxy
+  shell: git config --global --unset http.proxy
+  ignore_errors: true
+
+- name: unset git https proxy
+  shell: git config --global --unset https.proxy
+  ignore_errors: true
+
+- name: unset proxy for curl
+  shell: rm ~/.curlrc
+  ignore_errors: true
+
+- name: unset proxy for curl as root
+  shell: rm /root/.curlrc
+  become: true
+  ignore_errors: true

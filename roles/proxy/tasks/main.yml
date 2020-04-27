@@ -1,0 +1,6 @@
+---
+- import_tasks: set_proxy.yml
+  when: set_proxy is defined and set_proxy
+
+- import_tasks: unset_proxy.yml
+  when: unset_proxy is defined and unset_proxy
